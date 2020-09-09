@@ -20,30 +20,31 @@ class AndroidPermissions {
         const val REQUEST_CODE_CAMERA = 101
 
 
-        fun askPermissions(activity: Activity, permissionToCheck: String) {
-
-            if(checkSelfPermission(activity, permissionToCheck) != PackageManager.PERMISSION_GRANTED){
-
-                Log.i("logAz", "Permission $permissionToCheck denied")
-                requestPermissions(activity, arrayOf(Manifest.permission.CAMERA),
-                    REQUEST_CODE_CAMERA
-                )
-            } else {
-                Log.i("logAz", "Permission granted")
-            }
-        }
-
+//        fun askPermissions(activity: Activity, permissionToCheck: String) {
+//
+//            var allPermissionAreOK = true
+//            if(checkSelfPermission(activity, permissionToCheck) != PackageManager.PERMISSION_GRANTED){
+//
+//
+//                Log.i("logAz", "Permission $permissionToCheck denied")
+//                requestPermissions(activity, arrayOf(Manifest.permission.CAMERA),
+//                    REQUEST_CODE_CAMERA
+//                )
+//            } else {
+//                Log.i("logAz", "Permission granted")
+//            }
+//        }
+//
         fun showConfigurationPermissions(context: Context, packageName: String) {
-            Toast.makeText(context, "Debe habilitar los permisos necesarios.", Toast.LENGTH_SHORT)
+            Toast.makeText(context, "You must enable the permissions.", Toast.LENGTH_SHORT)
                 .show()
-            val i = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            i.addCategory(Intent.CATEGORY_DEFAULT)
-            i.data = Uri.parse("package:$packageName")
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-            i.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            context.startActivity(i)
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.data = Uri.parse("package:$packageName")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            context.startActivity(intent)
         }
-
     }
 }
