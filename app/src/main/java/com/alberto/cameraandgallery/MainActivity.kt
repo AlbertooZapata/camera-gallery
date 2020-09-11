@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCamera() {
         val values = ContentValues()
-        values.put(MediaStore.Images.Media.TITLE, getPictureTitle())
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, getPictureTitle())
         values.put(MediaStore.Images.Media.DESCRIPTION, getPictureDescription())
         imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         //camera intent
@@ -126,32 +126,40 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        Log.i("logAz", "onActivityResult [$requestCode]")
-
         when (requestCode) {
             IMAGE_CAPTURE_CODE -> {
 
-                Log.i("logAz", "onActivityResult => REQUEST_CODE_CAMERA")
-
                 if (resultCode == Activity.RESULT_OK) {
-
-                    Log.i("logAz", "onActivityResult => Activity.RESULT_OK")
-
                     bitmapPicture = imageUri?.let { getCapturedImage(it) }!!
                     imgView.setImageBitmap(bitmapPicture)
-                    Log.i("logAz", getRealPathFromURI(imageUri))
+                    Log.i("logAz", "Compressed image: ${compressImage(bitmapPicture)}")
+                    Log.i("logAz", getAllShownImagesPath(imageUri!!).size.toString())
                 }
             }
         }
+    }
+    private fun getAllShownImagesPath(uriExternal: Uri): MutableList<Uri> {
+        val cursor: Cursor?
+        val columnIndexID: Int
+        val listOfAllImages: MutableList<Uri> = mutableListOf()
+        val projection = arrayOf(MediaStore.Images.Media._ID)
+        var imageId: Long
+        cursor = contentResolver.query(uriExternal, projection, null, null, null)
+        if (cursor != null) {
+            columnIndexID = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            while (cursor.moveToNext()) {
+                imageId = cursor.getLong(columnIndexID)
+                val uriImage = Uri.withAppendedPath(uriExternal, "" + imageId)
+                listOfAllImages.add(uriImage)
+                Log.i("logAz", "Path: ${uriImage.path}")
+            }
+            cursor.close()
+        }
+        return listOfAllImages
+    }
 
-    }
-    private fun getRealPathFromURI(contentUri: Uri?): String {
-        val proj = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor: Cursor = contentResolver.query(contentUri!!, proj, null, null, null)!!
-        val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-        cursor.moveToFirst()
-        return cursor.getString(columnIndex)
-    }
+
+
 
 
     private fun reduceQuality(bitmap: Bitmap): Bitmap? {
@@ -162,10 +170,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun compressImage(image: Bitmap): String? {
-        val baos = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.JPEG, 50, baos) //bm = Bitmap
-        val b: ByteArray = baos.toByteArray()
+    private fun compressImage(image: Bitmap): String {
+        val byteArrayOS = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOS) //bm = Bitmap
+        val b: ByteArray = byteArrayOS.toByteArray()
         return Base64.encodeToString(b, Base64.DEFAULT)
     }
 }
